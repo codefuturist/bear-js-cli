@@ -63,6 +63,13 @@ export default class AddText extends Command {
 
     const params = { ...args, ...flags };
 
+    // Filter out optional params that are undefined to prevent empty query values
+    Object.keys(params).forEach(key => {
+      if (params[key as keyof typeof params] === undefined) {
+        delete params[key as keyof typeof params];
+      }
+    });
+
     const response = await bearExec<NoteContents>("add-text", params);
     
     if (flags["creation-date"] || flags["add-id"]) {
@@ -75,8 +82,12 @@ export default class AddText extends Command {
   private enhanceContent(content: string, noteId: string, flags: any): string {
     let enhancedContent = content;
 
-    // Add creation date
-    if (flags["creation-date"]) {
+    // Check if footer already exists to prevent duplicates
+    const hasCreationDate = /---\s*\*Created:/.test(content);
+    const hasNoteId = /<!-- Note ID:/.test(content);
+
+    // Add creation date only if it doesn't already exist
+    if (flags["creation-date"] && !hasCreationDate) {
       const creationDate = new Date().toLocaleDateString("en-US", {
         weekday: "short",
         year: "numeric", 
@@ -89,8 +100,8 @@ export default class AddText extends Command {
       enhancedContent += `\n\n---\n*Created: ${creationDate}*`;
     }
 
-    // Add note ID as HTML comment
-    if (flags["add-id"] && noteId) {
+    // Add note ID as HTML comment only if it doesn't already exist
+    if (flags["add-id"] && noteId && !hasNoteId) {
       enhancedContent += `\n<!-- Note ID: ${noteId} -->`;
     }
 

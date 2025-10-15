@@ -11,16 +11,47 @@ interface Args {
 
 export const readPipe: () => Promise<string> = () => {
   return new Promise(resolve => {
-    const stdin = process.openStdin();
+    const stdin = process.stdin;
     stdin.setEncoding("utf-8");
 
-    if (stdin.isTTY) resolve("");
+    // If running in a TTY (no pipe), return immediately
+    if (stdin.isTTY) {
+      return resolve("");
+    }
 
+    // If there's no data available immediately, set a short timeout to avoid hanging
     let data = "";
-    stdin.on("data", chunk => {
+    const onData = (chunk: string) => {
       data += chunk;
-    });
-    stdin.on("end", () => resolve(data));
+    };
+    const onEnd = () => {
+      cleanup();
+      resolve(data);
+    };
+    const onReadable = () => {
+      // if readable fires but no data, schedule micro-timeout to break
+      const chunk = stdin.read();
+      if (chunk) {
+        data += chunk.toString();
+      }
+    };
+    const cleanup = () => {
+      stdin.removeListener("data", onData);
+      stdin.removeListener("end", onEnd);
+      stdin.removeListener("readable", onReadable);
+    };
+
+    stdin.on("data", onData);
+    stdin.on("end", onEnd);
+    stdin.on("readable", onReadable);
+
+    // Safety: if nothing arrives within 50ms, assume no pipe and resolve
+    setTimeout(() => {
+      if (!data) {
+        cleanup();
+        resolve("");
+      }
+    }, 50);
   });
 };
 
