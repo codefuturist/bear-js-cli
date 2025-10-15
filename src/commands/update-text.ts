@@ -5,7 +5,7 @@ import { logNoteContents } from "../utils/log";
 import cmdFlags from "../utils/flags";
 import { argsWithPipe } from "../utils/read-pipe";
 
-export default class Update extends Command {
+export default class UpdateText extends Command {
   static description = [
     "Update Bear notes with enhanced features and intuitive interface.",
     "Supports smart search, content enhancement, ID tracking, and file input.",
@@ -61,8 +61,8 @@ export default class Update extends Command {
   ];
 
   async run() {
-    const { args: cmdArgs, flags } = this.parse(Update);
-    let args = await argsWithPipe(Update.args, cmdArgs, true);
+    const { args: cmdArgs, flags } = this.parse(UpdateText);
+    let args = await argsWithPipe(UpdateText.args, cmdArgs, true);
 
     // Handle content from file
     if (flags["content-file"]) {
