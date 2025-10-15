@@ -61,6 +61,7 @@ Right now the project would greatly benefit from people posting their workflows 
 * [`bear archive [ID]`](#bear-archive-id)
 * [`bear auth API-TOKEN`](#bear-auth-api-token)
 * [`bear autocomplete [SHELL]`](#bear-autocomplete-shell)
+* [`bear batch-update`](#bear-batch-update)
 * [`bear change-font [FONT]`](#bear-change-font-font)
 * [`bear change-theme [THEME]`](#bear-change-theme-theme)
 * [`bear commands`](#bear-commands)
@@ -79,6 +80,7 @@ Right now the project would greatly benefit from people posting their workflows 
 * [`bear trash [ID]`](#bear-trash-id)
 * [`bear untagged [SEARCH]`](#bear-untagged-search)
 * [`bear update [CHANNEL]`](#bear-update-channel)
+* [`bear update-text [CONTENT]`](#bear-update-text-content)
 
 ## `bear add-file [FILE]`
 
@@ -232,6 +234,41 @@ EXAMPLES
 
 _See code: [@oclif/plugin-autocomplete](https://github.com/oclif/plugin-autocomplete/blob/v0.3.0/src/commands/autocomplete/index.ts)_
 
+## `bear batch-update`
+
+Batch update multiple Bear notes from markdown files in a directory.
+
+```
+USAGE
+  $ bear batch-update
+
+OPTIONS
+  -d, --directory=directory                      (required) directory containing markdown files to process
+  -h, --help                                     show CLI help
+
+  -m, --mode=prepend|append|replace|replace_all  [default: append] the allowed values are prepend, append, replace_all
+                                                 and replace (keep the note's title untouched)
+
+  -n, --dry-run                                  show what would be updated without making changes
+
+  -p, --pattern=pattern                          [default: *.md] file pattern to match (glob)
+
+  -q, --add-id                                   include note ID as HTML comment in content
+
+  -r, --creation-date                            add creation date to content with timestamp format
+
+  -r, --recursive                                recursively process subdirectories
+
+  -w, --write-back                               write enhanced content back to source files
+
+DESCRIPTION
+  Automatically detects Note IDs in files and updates corresponding notes.
+  Adds standardized footers with Created and Last Updated timestamps.
+  Can process directories recursively.
+```
+
+_See code: [src/commands/batch-update.ts](https://github.com/sloansparger/bear/blob/v0.1.3/src/commands/batch-update.ts)_
+
 ## `bear change-font [FONT]`
 
 Change the selected Bear Font.
@@ -307,17 +344,21 @@ ARGUMENTS
   TEXT  note body
 
 OPTIONS
-  -a, --file=file          path to a file attachment
-  -c, --edit               place the cursor inside the note editor
-  -d, --timestamp          prepend the current date and time to the text
-  -e, --new-window         open the note in an external window
-  -h, --help               show CLI help
-  -j, --filename=filename  override file name including extension
-  -n, --title=title        note title
-  -o, --open-note          display the new note in Bear's main or external window
-  -p, --pin                pin the note to the top of the list
-  -t, --tag=tag            tag for note
-  -w, --show-window        force the opening of bear main window
+  -a, --file=file                  path to a file attachment
+  -c, --edit                       place the cursor inside the note editor
+  -d, --timestamp                  prepend the current date and time to the text
+  -e, --new-window                 open the note in an external window
+  -g, --content-file=content-file  read content from file path
+  -h, --help                       show CLI help
+  -j, --filename=filename          override file name including extension
+  -n, --title=title                note title
+  -o, --open-note                  display the new note in Bear's main or external window
+  -p, --pin                        pin the note to the top of the list
+  -q, --add-id                     include note ID as HTML comment in content
+  -r, --creation-date              add creation date to content with timestamp format
+  -t, --tag=tag                    tag for note
+  -w, --show-window                force the opening of bear main window
+  -w, --write-back                 write enhanced content back to source file (updates footer in markdown)
 
 DESCRIPTION
   Returns unique note identifier of new note.
@@ -631,8 +672,76 @@ OPTIONS
 ```
 
 _See code: [@oclif/plugin-update](https://github.com/oclif/plugin-update/blob/v1.5.0/src/commands/update.ts)_
+
+## `bear update-text [CONTENT]`
+
+Update Bear notes with enhanced features and intuitive interface.
+
+```
+USAGE
+  $ bear update-text [CONTENT]
+
+ARGUMENTS
+  CONTENT  content to add to note
+
+OPTIONS
+  -c, --edit                                     place the cursor inside the note editor
+  -d, --timestamp                                prepend the current date and time to the text
+  -e, --new-window                               open the note in an external window
+  -g, --content-file=content-file                read content from file path
+  -h, --help                                     show CLI help
+  -i, --id=id                                    note unique identifier
+
+  -l, --new-line                                 if true and mode is append force the text to appear on a new line
+                                                 inside the note
+
+  -m, --mode=prepend|append|replace|replace_all  [default: append] the allowed values are prepend, append, replace_all
+                                                 and replace (keep the note's title untouched)
+
+  -n, --title=title                              note title
+
+  -o, --open-note                                display the new note in Bear's main or external window
+
+  -q, --add-id                                   include note ID as HTML comment in content
+
+  -r, --creation-date                            add creation date to content with timestamp format
+
+  -s, --search-term=search-term                  search term to find notes if no ID/title provided
+
+  -t, --tag=tag                                  tag for note
+
+  -u, --header=header                            note title
+
+  -v, --view-updated                             view updated content after update
+
+  -w, --show-window                              force the opening of bear main window
+
+  -w, --write-back                               write enhanced content back to source file (updates footer in markdown)
+
+  -x, --exclude-trashed                          exclude trashed notes
+
+  -y, --no-confirm                               skip confirmation prompts for automation
+
+DESCRIPTION
+  Supports smart search, content enhancement, ID tracking, and file input.
+  This is the enhanced version of add-text with better UX.
+  Beta encrypted notes can't be accessed with this call.
+  Returns note's contents.
+
+EXAMPLES
+  $ bear update "New content" --id ABC123
+  $ bear update --search-term "meeting" --mode append
+  $ bear update --content-file ./notes.md --creation-date --add-id
+  $ bear update --content-file ./notes.md --creation-date --add-id --write-back
+  $ bear update "Project update" --search-term "project" --timestamp --no-confirm
+  $ bear update --title "Daily Notes" --creation-date --view-updated
+```
+
+_See code: [src/commands/update-text.ts](https://github.com/sloansparger/bear/blob/v0.1.3/src/commands/update-text.ts)_
 <!-- commandsstop -->
 
 ```
 
 ```
+
+<!-- Note ID: 01B97F55-161B-4F93-A196-AF2675749BBD -->
