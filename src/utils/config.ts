@@ -1,4 +1,4 @@
-import * as Conf from "conf";
+import Conf from "conf";
 
 const config = new Conf({
   schema: {
