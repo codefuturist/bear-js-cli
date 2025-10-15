@@ -6,3 +6,21 @@
 /tmp
 /yarn.lock
 node_modules
+
+# Build artifacts
+tsconfig.tsbuildinfo
+oclif.manifest.json
+
+# Test and backup files
+test-exports/
+backups/
+*.backup
+
+# Logs and temporary files
+*.log
+pid.txt
+bear-updater.log
+
+# Old scripts (replaced by TypeScript)
+auto-update-notes.zsh
+bear-diagnostic.zsh
